@@ -1,0 +1,23 @@
+li{
+    cursor: pointer;
+}
+
+li:hover{
+    text-decoration: underline;
+}
+
+/* The li:hover selector uses the :hover pseudo-class. A pseudo-class is a
+kind of selector that applies only when an element is in a certain state:
+li:hover matches any li element that the mouse is currently hovering
+over. */
+#box{      
+    position: fixed;
+    top: 0px;
+    left: 0px;
+    width: 10px;
+    height: 10px;
+    background-color: hotpink;
+}
+
+/*div is short for content division 
+viewport is the part of the browser that shows the content.*/

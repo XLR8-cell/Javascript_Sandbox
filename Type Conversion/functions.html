@@ -1,0 +1,121 @@
+<html>
+
+<body>
+    <script>
+        function myName(name) {
+            console.log(`My name is ${name}`);
+        }
+
+        myName("Gilbert Ondonga");
+
+        let addCounter = 0;
+
+        function add(x, y) {
+            addCounter++
+            console.log(`I walked ${x + y} miles!`);
+            console.log(`X is ${x} and Y is ${y}`);
+            return x + y;
+        }
+
+        //let currentSum = add(500, 900);
+
+        // Anonymous functions 
+
+        let unknownCounter = 0;
+        //function expression
+        let unknown = function (firstName, secondName) {
+            unknownCounter++;
+            console.log(`My fullname is ${firstName} ${secondName}`);
+            return firstName + " " + secondName;
+        };
+
+        // Arrow functions
+        //They dont use the function keyword
+        //If there is only one parameter you dont need to add parentheses
+        //If there is only one statement in body you dont need to add braces
+
+        let squared = x => x * x;
+
+        let addArrow = (x, y) => x + y;
+
+        setInterval(addArrow, 7000);
+
+        // Try it yourself
+        function namedNumbers(x) {
+            if (-1 < x && x < 6) {
+                let numArray = [];
+                numArray.push(x);
+                for (let key of numArray) {
+                    if (key === 1) {
+                        return "One";
+                    } else if (key === 2) {
+                        return "Two";
+                    } else if (key === 3) {
+                        return "Three";
+                    } else if (key === 4) {
+                        return "Four";
+                    } else if (key === 5) {
+                        return "Five";
+                    } else if (key === 0) {
+                        return "Zero";
+                    } else if (key === 6) {
+                        return "Six";
+                    }
+                }
+            } else { console.log("Please enter a number with in the range of 0 to 5") }
+        }
+
+        let callCounter = 0;
+        let calledNum = function () {
+            callCounter++;
+            console.log(`This function has been called ${callCounter} times`);
+        };
+
+        let currentDateTime = () => console.log(`The current date and time is ${new Date()}`);
+
+        let myColors = (name, ...favouriteColors) => {
+            let colorsString = favouriteColors.join(", ");
+            console.log(`My name is ${name} and my favourite colors are ${colorsString}`);
+        }
+
+        function sum(...numbers) {
+            let total = 0;
+            for (let number of numbers) {
+                total += number;
+            }
+            return total;
+        }
+
+        let shoppingList = ["Milk", "Nuts", "Cooking Oil", "Bananas", "Grape"];
+
+        console.log(shoppingList.find(item => item[0] === "m"));
+        console.log(shoppingList.find(item => item.length > 6));
+        console.log(shoppingList.filter(item => item.length > 6));
+        console.log(shoppingList.map(item => item.length > 6));
+
+        function addSuffix(suffix) {
+            return function (text) {
+                return text + suffix;
+            }
+        }
+
+        let appendExcitement = addSuffix("!!!");
+
+        console.log(appendExcitement("This is Great"));
+
+        function makeWrapper(prefix, suffix) {
+            return text => prefix + text + suffix;
+        }
+
+        let bracketWrapper = makeWrapper("[", "]");
+        console.log(bracketWrapper("This text is within brackets"));
+        let bracesWrapper = makeWrapper("{", "}");
+        console.log(bracesWrapper("This is a brace enclosed statement"));
+
+        let backTickWrapper = makeWrapper("`", "`");
+        console.log(backTickWrapper("This is held within backticks"));
+
+    </script>
+</body>
+
+</html>

@@ -1,0 +1,28 @@
+html{
+    font-family: Arial, Helvetica, sans-serif;
+}
+
+h1{
+    color:red;
+    font-style: italic;
+}
+
+#main-heading{
+    font-size: 48px;
+}
+
+strong{
+    color:blue;
+}
+
+p strong{
+    font-size: 24px;
+}
+
+.highlight{
+    background-color: yellow;
+}
+
+.highlight strong{
+    background-color: darkorange;
+}

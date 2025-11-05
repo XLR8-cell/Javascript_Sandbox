@@ -1,0 +1,158 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Document</title>
+</head>
+
+<body>
+    <script>
+        // class Player {
+        //     constructor(startX, startY) {
+        //         this.x = startX;
+        //         this.y = startY;
+        //     }
+
+        //     move(dx, dy) {
+        //         this.x += dx;
+        //         this.y += dy;
+        //     }
+        // }
+
+        // let player1 = new Player(0, 0);
+
+        // player1.move(8, 9);
+
+        // let player2 = new Player(0, 0);
+
+        // player2.move(3, 3);
+        // player2.move(3, 3);
+
+        // console.log(player2.x);
+
+        // CLASS BASED INHERITANCE
+        // Abstract class
+        class Actor {
+            constructor(startX, startY) {
+                this.x = startX;
+                this.y = startY;
+            }
+
+            move(dx, dy) {
+                this.x += dx;
+                this.y += dy;
+            }
+
+            distanceTo(otherActor) {
+                let dx = otherActor.x - this.x;
+                let dy = otherActor.y - this.y;
+                return Math.hypot(dx, dy);
+            }
+        }
+
+        class Player extends Actor {
+            constructor(startX, startY) {
+                super(startX, startY);
+
+                this.hp = 100; //had to add this new property so must define its constructor
+            }
+        }
+
+        class Enemy extends Actor {
+            /* When a subclass doesn’t define a constructor, its parent class’s constructor is called automatically
+               when a new instance of the subclass is created. We are not adding any new property to Enemy*/
+            attack(Player) {
+                if (this.distanceTo(Player) < 4) {
+                    Player.hp -= 10;
+                    return true;
+                } else {
+                    return false;
+                }
+            }
+        }
+
+        let player = new Player(1, 2);
+        let enemy = new Enemy(3, 4);
+
+        console.log(player.hp);
+        console.log(enemy.distanceTo(player));
+        console.log(enemy.attack(player));
+        console.log(player.hp);
+        player.move(5, 5);
+        console.log(enemy.distanceTo(player));
+        console.log(enemy.attack(player));
+        console.log(player.hp);
+
+        console.log(player instanceof Player);
+        console.log(player instanceof Actor);
+        console.log(player instanceof Enemy);
+
+        class Follower extends Actor {
+            constructor(startX, startY, player) {
+                super(startX, startY);
+                this.followedEntity = player;
+            }
+
+            follow() {
+                this.x = this.followedEntity.x;
+                this.y = this.followedEntity.y
+                return "followed";
+            }
+        }
+
+        let player1 = new Player(1, 1);
+        let follower = new Follower(0, 0, player1)
+        player1.move(6, 6);
+
+        console.log(follower.follow());
+        console.log(follower.y);
+        console.log(follower.x);
+
+        // PROTOTYPE BASED INHERITANCE
+        // A function constructor that behaves like a class. Its automatically given the prototype property on creation
+        function Cat(name) {
+            this.name = name;
+        }
+        Cat.prototype.sayHello = function () {
+            console.log(`Miaoh!, my name is ${this.name}`);
+        };
+
+        let kiki = new Cat("Kiki");
+        console.log(kiki.sayHello());
+
+        class Dog {
+            constructor(name) {
+                this.name = name;
+            }
+
+            sayHello() {
+                console.log(`Woof!, My name is ${this.name}`);
+            }
+        }
+
+        console.log(Dog.prototype.sayHello());
+        let bosco = new Dog("Bosco");
+        console.log(bosco.sayHello());
+
+        // Method Overriding in both instantiation methods is the same
+        // Defining a method directly on the instance takes precedence over using the prototype
+        let moona = new Cat("Moona");
+        moona.sayHello = function () {
+            console.log(`PURR, MY FIRST NAME IS ${this.name}!!`);
+        };
+
+        console.log(moona.sayHello());
+        console.log(kiki.sayHello());
+
+        let yappy = new Dog("Yappy");
+
+        yappy.sayHello = function () {
+            console.log(`Woof!, I am ${this.name} and I like to yap! yap! yap!`);
+        };
+        console.log(yappy.sayHello());
+    </script>
+</body>
+    
+</html>
