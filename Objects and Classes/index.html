@@ -1,0 +1,287 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <title>Sisi Lab 1 - Classes</title>
+</head>
+<body>
+  <h1>Sisi Core Classes Lab</h1>
+  <p>Open browser console (F12) to see test outputs.</p>
+
+  <script>
+    // --- Part A & B: Citizen Class ---
+    class Citizen {
+      static #nextId = 1;
+      static registeredCount = 0;
+      static supportedCounties = ["Nairobi", "Mombasa", "Kisumu", "Kiambu"];
+
+      static isCountySupported(county) {
+        return Citizen.supportedCounties.includes(county);
+      }
+
+      constructor(name, county) {
+        if (!Citizen.isCountySupported(county)) {
+          throw new Error(`County '${county}' is not supported on Sisi.`);
+        }
+        this.id = Citizen.#nextId++;
+        this.name = name;
+        this.county = county;
+        Citizen.registeredCount++;
+      }
+
+      description() {
+        return `${this.name} from ${this.county}`;
+      }
+    }
+
+    // --- Part C: Project Class ---
+    class Project {
+      static #nextId = 1;
+
+      constructor(title, budgetKes) {
+        this.id = Project.#nextId++;
+        this.title = title;
+        this.budgetKes = budgetKes;
+        this.votesMap = new Map(); // citizenId -> 'support' | 'oppose'
+        this.feedback = [];
+      }
+
+      get level() {
+        return "National";
+      }
+
+      vote(citizen, choice) {
+        if (choice !== "support" && choice !== "oppose") {
+          console.log(`Refused: choice must be 'support' or 'oppose', got '${choice}'`);
+          return false;
+        }
+
+        if (this.hasVoted(citizen)) {
+          console.log(`Refused: ${citizen.name} has already voted on ${this.title}`);
+          return false;
+        }
+
+        this.votesMap.set(citizen.id, choice);
+        return true;
+      }
+
+      hasVoted(citizen) {
+        return this.votesMap.has(citizen.id);
+      }
+
+      addFeedback(citizen, comment) {
+        if (!comment || comment.trim() === "") {
+          console.log("Refused: Feedback cannot be empty.");
+          return false;
+        }
+
+        this.feedback.push({
+          author: citizen.name,
+          citizenId: citizen.id,
+          comment: comment.trim()
+        });
+        return true;
+      }
+
+      getSupportCount() {
+        let count = 0;
+        for (let val of this.votesMap.values()) {
+          if (val === "support") count++;
+        }
+        return count;
+      }
+
+      getOpposeCount() {
+        let count = 0;
+        for (let val of this.votesMap.values()) {
+          if (val === "oppose") count++;
+        }
+        return count;
+      }
+
+      getSupportPercentage() {
+        if (this.votesMap.size === 0) return 0;
+        return (this.getSupportCount() / this.votesMap.size) * 100;
+      }
+
+      report() {
+        const supp = this.getSupportCount();
+        const opp = this.getOpposeCount();
+        const pct = this.getSupportPercentage().toFixed(1);
+        return `${this.title} [${this.level}]: Support=${supp}, Oppose=${opp}, Support%=${pct}%`;
+      }
+    }
+
+    // --- Part D: CountyProject Class ---
+    class CountyProject extends Project {
+      constructor(title, budgetKes, county) {
+        if (!Citizen.isCountySupported(county)) {
+          throw new Error(`County '${county}' is not supported.`);
+        }
+        super(title, budgetKes);
+        this.county = county;
+      }
+
+      get level() {
+        return `${this.county} County`;
+      }
+
+      vote(citizen, choice) {
+        if (citizen.county !== this.county) {
+          console.log(`Refused: ${citizen.name} (${citizen.county}) cannot vote on ${this.county} projects.`);
+          return false;
+        }
+        return super.vote(citizen, choice);
+      }
+    }
+
+    // --- Part E: Portal Class ---
+    class Portal {
+      constructor() {
+        this.citizens = [];
+        this.projects = [];
+        this.loggedInCitizen = null;
+      }
+
+      registerCitizen(name, county) {
+        const citizen = new Citizen(name, county);
+        this.citizens.push(citizen);
+        return citizen;
+      }
+
+      login(citizenId) {
+        const found = this.citizens.find(c => c.id === citizenId);
+        if (!found) {
+          console.log(`Login failed: ID ${citizenId} not found.`);
+          return false;
+        }
+        this.loggedInCitizen = found;
+        return true;
+      }
+
+      addProject(project) {
+        this.projects.push(project);
+      }
+
+      findProjectById(id) {
+        return this.projects.find(p => p.id === id);
+      }
+
+      listProjects(type = "all") {
+        if (type === "all") return this.projects;
+        if (type === "national") return this.projects.filter(p => p.level === "National");
+        if (type === "myCounty") {
+          if (!this.loggedInCitizen) return [];
+          return this.projects.filter(p => p instanceof CountyProject && p.county === this.loggedInCitizen.county);
+        }
+        return [];
+      }
+
+      vote(projectId, choice) {
+        if (!this.loggedInCitizen) {
+          console.log("Vote failed: No user logged in.");
+          return false;
+        }
+        const proj = this.findProjectById(projectId);
+        if (!proj) return false;
+        return proj.vote(this.loggedInCitizen, choice);
+      }
+
+      addFeedback(projectId, comment) {
+        if (!this.loggedInCitizen) {
+          console.log("Feedback failed: No user logged in.");
+          return false;
+        }
+        const proj = this.findProjectById(projectId);
+        if (!proj) return false;
+        return proj.addFeedback(this.loggedInCitizen, comment);
+      }
+
+      getTopSupportedProject() {
+        if (this.projects.length === 0) return null;
+        let top = this.projects[0];
+        for (let p of this.projects) {
+          if (p.getSupportPercentage() > top.getSupportPercentage()) {
+            top = p;
+          }
+        }
+        return top;
+      }
+    }
+
+    // ==========================================
+    // ACCEPTANCE CHECKS & TESTS
+    // ==========================================
+    console.log("--- LAB 1 TESTS ---");
+
+    const portal = new Portal();
+
+    // 1. Register citizens & check IDs + count
+    const c1 = portal.registerCitizen("Wanjiku", "Nairobi");
+    const c2 = portal.registerCitizen("Amina", "Mombasa");
+    const c3 = portal.registerCitizen("Ochieng", "Kisumu");
+    console.log("1. IDs:", c1.id, c2.id, c3.id, "| Total Count:", Citizen.registeredCount);
+
+    // 2. Unsupported county refusal
+    try {
+      portal.registerCitizen("Poseidon", "Atlantis");
+    } catch (err) {
+      console.log("2. Unsupported county caught:", err.message);
+    }
+
+    // Load initial project data
+    const pNat = new Project("Affordable Housing Phase 3", 5_000_000_000);
+    const pNai = new CountyProject("Market Upgrade", 120_000_000, "Nairobi");
+    const pMba = new CountyProject("Ferry Walkway", 80_000_000, "Mombasa");
+    const pKis = new CountyProject("Lakefront Street Lights", 45_000_000, "Kisumu");
+
+    portal.addProject(pNat);
+    portal.addProject(pNai);
+    portal.addProject(pMba);
+    portal.addProject(pKis);
+
+    // 3. Double voting test
+    pNat.vote(c1, "support");
+    const initialSupport = pNat.getSupportCount();
+    pNat.vote(c1, "oppose"); // Refused
+    console.log("3. Double vote blocked:", pNat.getSupportCount() === initialSupport);
+
+    // 4. Cross-county voting test
+    console.log("4. Cross-county voting checks:");
+    pNai.vote(c2, "support"); // Refused (Mombasa citizen on Nairobi project)
+    const localVote = pNai.vote(c1, "support"); // Allowed (Nairobi citizen)
+    console.log("   Local vote allowed:", localVote);
+
+    // 5. Level getter output
+    console.log("5. Level check -> Kisumu:", pKis.level, "| National:", pNat.level);
+
+    // 6. Instanceof check
+    console.log("6. pKis instanceof Project:", pKis instanceof Project);
+
+    // 7. My county listing
+    portal.login(c2.id); // Login as Amina (Mombasa)
+    const myProjects = portal.listProjects("myCounty");
+    console.log("7. My county projects (Mombasa):", myProjects.map(p => p.title));
+
+    // 8. Blank vs valid feedback
+    console.log("8. Feedback checks:");
+    pNat.addFeedback(c2, "   "); // Refused blank
+    pNat.addFeedback(c2, "Good progress on housing.");
+    console.log("   Feedback stored:", pNat.feedback);
+
+    // 9. Support percentage with 0 votes
+    console.log("9. Unvoted support %:", pKis.getSupportPercentage());
+
+    // 10. Top project calculation
+    const c4 = portal.registerCitizen("Kamau", "Kiambu");
+    pKis.vote(c3, "support");
+    pNat.vote(c2, "support");
+    pNat.vote(c3, "support");
+    pNat.vote(c4, "oppose");
+
+    const topProject = portal.getTopSupportedProject();
+    console.log("10. Top project:", topProject.title, `(${topProject.getSupportPercentage().toFixed(1)}%)`);
+    
+  </script>
+</body>
+</html>
